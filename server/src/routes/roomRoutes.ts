@@ -14,7 +14,7 @@ const router = Router();
 
 // 1. Create a brand new collaborative workspace room
 router.post('/create', protect, createRoom);
-router.post('/verify', verifyRoom);
+router.post('/verify', protect, verifyRoom);
 router.get('/my-rooms', protect, getUserRooms);
 
 // 4. Persistence pipeline: Save/Update virtual file tree node

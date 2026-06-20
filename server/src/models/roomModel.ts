@@ -46,6 +46,7 @@ const roomSchema = new Schema<IRoom>(
     roomPasswordPlain: {
   type: String,
   default: null,
+  select: false,
 },
     admin: {
       type: Schema.Types.ObjectId,

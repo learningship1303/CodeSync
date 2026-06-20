@@ -1,42 +1,40 @@
 import { Request, Response } from 'express';
-import { exec } from 'child_process';
-import fs from 'fs';
+import { dockerExecutor } from '../services/dockerExecutor';
+import { ExecutionRequest } from '../interfaces/execution.interface';
 
-export const runCode = async (
-  req: Request,
-  res: Response
-) => {
+export const runCode = async (req: Request, res: Response) => {
   try {
-    const { language, code } = req.body;
+    const { language, code, fileName } = req.body as ExecutionRequest;
 
-    if (language !== 'javascript') {
-      res.status(400).json({
-        output: 'Language not supported yet'
+    // Validation
+    if (!language || !code) {
+      return res.status(400).json({
+        success: false,
+        error: 'Language and code are required',
+        output: '',
+        executionTime: 0,
       });
-      return;
     }
 
-    fs.writeFileSync('temp.js', code);
+    // Execute code
+    const result = await dockerExecutor.execute({
+      language,
+      code,
+      fileName,
+      timeout: 10000,
+    });
 
-    exec(
-      'node temp.js',
-      (error, stdout, stderr) => {
-        if (error) {
-          res.json({
-            output: stderr
-          });
-          return;
-        }
-
-        res.json({
-          output: stdout
-        });
-      }
-    );
-
+    // Return results with appropriate status code
+    const statusCode = result.success ? 200 : 400;
+    return res.status(statusCode).json(result);
   } catch (error) {
-    res.status(500).json({
-      output: 'Execution failed'
+    return res.status(500).json({
+      success: false,
+      error: `Server error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      output: '',
+      executionTime: 0,
+      language: req.body.language || 'unknown',
+      status: 'failed',
     });
   }
 };

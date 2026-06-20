@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from '../config/auth';
 
 // Locally matching our extended request contract
 interface AuthenticatedRequest extends Request {
@@ -28,7 +29,7 @@ export const protect = async (req: AuthenticatedRequest, res: Response, next: Ne
       token = req.headers.authorization.split(' ')[1];
 
       // 2. Decode and verify token signature using our secret key
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret') as DecodedToken;
+      const decoded = jwt.verify(token, getJwtSecret()) as DecodedToken;
 
       // 3. Inject the authenticated user's ID into the request object payload
       req.user = { id: decoded.id };

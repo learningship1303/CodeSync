@@ -1,12 +1,24 @@
 import { Router } from 'express';
-import { registerUser, loginUser } from '../controllers/authController';
+import {
+  registerUser,
+  loginUser,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword,
+} from '../controllers/authController';
+import { passwordResetLimiter } from '../middlewares/rateLimiters';
 
 const router = Router();
 
-// Route for User Registration -> Maps to POST /api/auth/register
+// Registration & Verification Routes
 router.post('/register', registerUser);
 
-// Route for User Login -> Maps to POST /api/auth/login
+// Login Route
 router.post('/login', loginUser);
+
+// Password Recovery Routes
+router.post('/forgot-password', passwordResetLimiter, forgotPassword);
+router.post('/verify-reset-otp', verifyResetOtp);
+router.post('/reset-password', resetPassword);
 
 export default router;
